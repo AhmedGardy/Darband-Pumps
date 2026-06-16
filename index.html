@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>سیستەمی ئاودان</title>
 
+    <!-- Beautiful Native Kurdish Web Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700;800&display=swap" rel="stylesheet">
 
+    <!-- Points directly to your local GitHub repository image file for Home Screen Icon -->
     <link rel="apple-touch-icon" href="icon.png">
     
     <style>
@@ -132,6 +134,7 @@
             <p>ژمارە: 07507617224</p>
         </header>
 
+        <!-- PUMP 1: MZAXA -->
         <div class="card">
             <div class="card-title mzaxa-title">مزەخە</div>
             <div class="btn-container">
@@ -140,6 +143,7 @@
             </div>
         </div>
 
+        <!-- PUMP 2: BER -->
         <div class="card">
             <div class="card-title ber-title">بیر</div>
             <div class="btn-container">
@@ -153,7 +157,14 @@
         const PHONE_NUMBER = "07507617224";
 
         function sendSms(commandBody) {
-            window.location.href = `sms:${PHONE_NUMBER}&body=${encodeURIComponent(commandBody)}`;
+            // Smart OS Detector
+            const isApple = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            
+            // Fixed character layout logic for both distinct phone systems
+            const separator = isApple ? '&' : '?';
+            
+            // Execute universal routing string assembly
+            window.location.href = `sms:${PHONE_NUMBER}${separator}body=${encodeURIComponent(commandBody)}`;
         }
     </script>
 </body>
