@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pump Controller Dashboard</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0b0f19 0%, #111827 100%);
+            --card-bg: rgba(22, 30, 49, 0.7);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.25);
+            --danger: #f43f5e;
+            --danger-glow: rgba(244, 63, 94, 0.25);
+            --accent: #10b981;
+            --accent-glow: rgba(16, 185, 129, 0.2);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 440px;
+            margin-top: 10px;
+        }
+
+        header {
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, #38bdf8, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 15px 35px -5px rgba(0,0,0,0.4);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pump-dot {
+            width: 12px;
+            height: 12px;
+            background: #374151;
+            border-radius: 50%;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        .active-dot { 
+            background: var(--accent); 
+            box-shadow: 0 0 12px var(--accent); 
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 700;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input[type="datetime-local"] {
+            background: rgba(10, 15, 26, 0.7);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+        }
+
+        input[type="datetime-local"]:focus {
+            border-color: var(--primary);
+        }
+
+        .countdown-box {
+            background: rgba(10, 15, 26, 0.4);
+            border-radius: 14px;
+            padding: 14px;
+            margin-top: 5px;
+            text-align: center;
+            border: 1px dashed rgba(255,255,255,0.05);
+        }
+
+        .countdown-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .countdown-timer {
+            font-family: -apple-system-font, monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        button {
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-on {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: white;
+            box-shadow: 0 4px 14px var(--primary-glow);
+        }
+
+        .btn-off {
+            background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+            color: white;
+            box-shadow: 0 4px 14px var(--danger-glow);
+        }
+
+        button:active {
+            transform: scale(0.96);
+            opacity: 0.9;
+        }
+
+        .action-required {
+            animation: pulseBlink 1s infinite alternate;
+            border: 2px solid #ffffff !important;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.4) !important;
+        }
+
+        @keyframes pulseBlink {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.03); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>SMS PUMP CONTROL</h1>
+            <p>Target: 07507617224</p>
+        </header>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="pump-dot" id="dot-mzaxa"></span>
+                    Pump 1: Mzaxa
+                </div>
+            </div>
+            
+            <div class="input-row">
+                <div>
+                    <label>Start Time</label>
+                    <input type="datetime-local" id="mzaxa-on" onchange="syncSchedules()">
+                </div>
+                <div>
+                    <label>Stop Time</label>
+                    <input type="datetime-local" id="mzaxa-off" onchange="syncSchedules()">
+                </div>
+            </div>
+
+            <div class="countdown-box">
+                <div class="countdown-label" id="label-mzaxa">No Schedule Set</div>
+                <div class="countdown-timer" id="timer-mzaxa">--:--:--:--</div>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn-on" id="btn-mzaxa-on" onclick="sendSms('#PWD654321#RLOP1=1')">Manual ON</button>
+                <button class="btn-off" id="btn-mzaxa-off" onclick="sendSms('#PWD654321#RLOP1=0')">Manual OFF</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="pump-dot" id="dot-ber"></span>
+                    Pump 2: Ber
+                </div>
+            </div>
+            
+            <div class="input-row">
+                <div>
+                    <label>Start Time</label>
+                    <input type="datetime-local" id="ber-on" onchange="syncSchedules()">
+                </div>
+                <div>
+                    <label>Stop Time</label>
+                    <input type="datetime-local" id="ber-off" onchange="syncSchedules()">
+                </div>
+            </div>
+
+            <div class="countdown-box">
+                <div class="countdown-label" id="label-ber">No Schedule Set</div>
+                <div class="countdown-timer" id="timer-ber">--:--:--:--</div>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn-on" id="btn-ber-on" onclick="sendSms('#PWD654321#RLOP2=1')">Manual ON</button>
+                <button class="btn-off" id="btn-ber-off" onclick="sendSms('#PWD654321#RLOP2=0')">Manual OFF</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PHONE_NUMBER = "07507617224";
+
+        let configurations = {
+            mzaxa: { on: null, off: null },
+            ber: { on: null, off: null }
+        };
+
+        function syncSchedules() {
+            configurations.mzaxa.on = document.getElementById('mzaxa-on').value ? new Date(document.getElementById('mzaxa-on').value) : null;
+            configurations.mzaxa.off = document.getElementById('mzaxa-off').value ? new Date(document.getElementById('mzaxa-off').value) : null;
+            configurations.ber.on = document.getElementById('ber-on').value ? new Date(document.getElementById('ber-on').value) : null;
+            configurations.ber.off = document.getElementById('ber-off').value ? new Date(document.getElementById('ber-off').value) : null;
+        }
+
+        function sendSms(commandBody) {
+            window.location.href = `sms:${PHONE_NUMBER}&body=${encodeURIComponent(commandBody)}`;
+        }
+
+        function handleTimerLogic(pumpKey, dotId, labelId, timerId, btnOnId, btnOffId) {
+            const now = new Date();
+            const config = configurations[pumpKey];
+            let activeTarget = null;
+            let targetAction = '';
+
+            const btnOn = document.getElementById(btnOnId);
+            const btnOff = document.getElementById(btnOffId);
+            btnOn.classList.remove('action-required');
+            btnOff.classList.remove('action-required');
+
+            // Find upcoming target event
+            if (config.on && config.on > now) {
+                activeTarget = config.on;
+                targetAction = 'ON';
+                document.getElementById(dotId).className = "pump-dot"; 
+            } else if (config.off && config.off > now) {
+                activeTarget = config.off;
+                targetAction = 'OFF';
+                document.getElementById(dotId).className = "pump-dot active-dot"; 
+            }
+
+            if (!activeTarget) {
+                document.getElementById(labelId).innerText = "No upcoming schedule";
+                document.getElementById(timerId).innerText = "--:--:--:--";
+                return;
+            }
+
+            document.getElementById(labelId).innerText = `Time remaining until target ${targetAction}`;
+            
+            const delta = activeTarget - now;
+            
+            if (delta <= 1000) {
+                document.getElementById(timerId).innerText = "00:00:00:00";
+                document.getElementById(labelId).innerText = `⚠️ Press flashing button now!`;
+                
+                if (targetAction === 'ON') {
+                    btnOn.classList.add('action-required');
+                } else {
+                    btnOff.classList.add('action-required');
+                }
+                return;
+            }
+
+            const d = Math.floor(delta / (1000 * 60 * 60 * 24));
+            const h = Math.floor((delta % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((delta % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((delta % (1000 * 60)) / 1000);
+
+            const format = (v) => String(v).padStart(2, '0');
+            document.getElementById(timerId).innerText = `${format(d)}:${format(h)}:${format(m)}:${format(s)}`;
+        }
+
+        setInterval(() => {
+            handleTimerLogic('mzaxa', 'dot-mzaxa', 'label-mzaxa', 'timer-mzaxa', 'btn-mzaxa-on', 'btn-mzaxa-off');
+            handleTimerLogic('ber', 'dot-ber', 'label-ber', 'timer-ber', 'btn-ber-on', 'btn-ber-off');
+        }, 1000);
+    </script>
+</body>
+</html>
